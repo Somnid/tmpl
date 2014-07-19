@@ -10,13 +10,18 @@ Example
 
 Html
 ----
+
+```
 <template id="person">
 	<span class="first-name"></span>
 	<span class="last-name"></span>
 </template>
+```
 
 Javascript
 ----------
+
+```
 var personTmpl = document.getElementById("person");
 var personBindings = {
 	".first-name" : "firstName",
@@ -27,4 +32,5 @@ var personModel = {
 	lastName : "Parker"
 };
 
-var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);  
+var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);
+```
