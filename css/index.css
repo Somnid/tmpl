@@ -1,0 +1,22 @@
+body {
+	font-family: arial;
+}
+
+label, button, textarea, input {
+	display: block;
+}
+
+button {
+	margin: 0px;
+}
+
+textarea {
+	width: 100%;
+	height: 350px;
+	font-family: arial;
+}
+
+input[type='text']{
+	width: 100%;
+	border: 1px solid black;
+}
