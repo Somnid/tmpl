@@ -1,5 +1,5 @@
 var Tmpl = (function(){
- 
+
     function tmpl(templateElement, bindings, data){
         var docfrag = document.importNode(templateElement.content, true);
         Object.observe(data, dataChanged.bind({
@@ -7,11 +7,14 @@ var Tmpl = (function(){
             bindings : bindings
         }));
         for(var key in bindings){
-            docfrag.querySelector(key).innerText = traverseObjectProps(data, bindings[key]);
+            var element = docfrag.querySelector(key);
+            if(element){
+              docfrag.querySelector(key).innerText = traverseObjectProps(data, bindings[key]);
+            }
         }
         return docfrag;
     }
-     
+
     function dataChanged(changes){
         changes.forEach(propChanged.bind(this));
     }
@@ -24,7 +27,7 @@ var Tmpl = (function(){
             }
         }
     }
-    
+
     function traverseObjectProps(obj, accessor){
       var keys = accessor.split(".");
       var prop = obj;
@@ -39,11 +42,11 @@ var Tmpl = (function(){
       }
       return prop;
     }
-    
+
     function getFirstLevelProp(accessor){
       return accessor.split(".")[0];
     }
-    
+
     function queryElementInList(elements, selector){
       for(var i = 0; i < elements.length; i++){
         var el = elements[i].parentNode.querySelector(selector); //need parent because this can include self
@@ -53,7 +56,7 @@ var Tmpl = (function(){
       }
       return null;
     }
-    
+
     function ancestorOrSelf(thisNode, nodeToTest){
       while(thisNode != nodeToTest){
         if(nodeToTest.parentNode){
@@ -64,7 +67,7 @@ var Tmpl = (function(){
       }
       return true;
     }
-    
+
     function getDocfragChildList(docfrag){
       var list = [];
       for(var i = 0; i < docfrag.children.length; i++){
@@ -72,9 +75,9 @@ var Tmpl = (function(){
       }
       return list;
     }
- 
+
     return {
         tmpl : tmpl
     };
- 
+
 })();
