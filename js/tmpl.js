@@ -7,10 +7,12 @@ var Tmpl = (function(){
             bindings : bindings
         }));
         for(var key in bindings){
-            var element = docfrag.querySelector(key);
-            if(element){
-              docfrag.querySelector(key).innerText = traverseObjectProps(data, bindings[key]);
-            }
+          var element = docfrag.querySelector(key);
+          if(!element){
+            console.warn("Element: " + key + " did not exist");
+            return;
+          }
+          setElement(element, traverseObjectProps(data, bindings[key]));
         }
         return docfrag;
     }
@@ -21,9 +23,9 @@ var Tmpl = (function(){
 
     function propChanged(change){
         for(var key in this.bindings){
-            var element = queryElementInList(this.elements, key)
+            var element = queryElementInList(this.elements, key);
             if(element && getFirstLevelProp(this.bindings[key]) == change.name){
-              element.innerText = traverseObjectProps(change.object, this.bindings[key]) || "";
+              setElement(element, traverseObjectProps(change.object, this.bindings[key]) || "");
             }
         }
     }
@@ -33,11 +35,11 @@ var Tmpl = (function(){
       var prop = obj;
       for(var i = 0; i < keys.length; i++){
         if(keys[i]){
-			if(prop[keys[i]]){
-				prop = prop[keys[i]];
-			}else{
-				return null;
-			}
+			    if(prop[keys[i]]){
+				    prop = prop[keys[i]];
+			    }else{
+				    return null;
+			    }
         }
       }
       return prop;
@@ -74,6 +76,19 @@ var Tmpl = (function(){
         list.push(docfrag.children[i]);
       }
       return list;
+    }
+    
+    function setElement(element, value){
+      var elementType =  element.tagName.toUpperCase();
+      if(elementType == "INPUT" || elementType == "SELECT"){
+        if(element.type.toUpperCase() == "CHECKBOX"){
+          element.checked = value;
+        }else{
+          element.value = value;
+        }
+      }else{
+        element.textContent = value;
+      }
     }
 
     return {
