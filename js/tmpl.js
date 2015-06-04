@@ -54,17 +54,23 @@ var Tmpl = (function(){
           selector : attrKeySplit[0],
           attribute : attrKeySplit[1]
         };
-      }else if(key.indexOf("$") != -1){
-        var styleKeySplit = key.split("$");
+      }
+      
+      var styleRegEx = /\$[^=].*$/; //need to filter out $= which is valid in css 
+      var styleMatch = styleRegEx.exec(key);
+      var styleKey = styleMatch ? styleMatch[0].substr(1) : null;
+      
+      if(styleKey){
+        var styleSelect = key.replace(styleRegEx, "");
         return {
-          selector : styleKeySplit[0],
-          style : styleKeySplit[1]
-        };
-      }else{
-        return {
-          selector : key
+          selector : styleSelect,
+          style : styleKey
         };
       }
+      
+      return {
+          selector : key
+      };
     }
     
     function setElementValues(elements, value){
