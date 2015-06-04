@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function(){
 	var personTmpl = document.getElementById("person");
 	var controlTmpl = document.getElementById("controls");
+	var attributesTmpl = document.getElementById("attributes");
+	var styleTmpl = document.getElementById("style");
 	
 	var personBindings = {
 		".first-name" : "firstName",
@@ -24,11 +26,32 @@ document.addEventListener("DOMContentLoaded", function(){
 	  checkbox : false
 	};
 	
+	var attributeBindings = {
+	  ".link!href" : "link",
+	  ".link" : "link"
+	};
+	var attributeModel = {
+	  link : "http://www.google.com"
+	};
+	
+	var styleBindings = {
+	  "div$background-color" : "color",
+	};
+	var styleModel = {
+	  color : "#000"
+	};
+	
 	var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);
 	document.body.appendChild(markup);
 	
 	var markup2 = Tmpl.tmpl(controlTmpl, controlBindings, controlModel);
 	document.body.appendChild(markup2);
+	
+	var markup3 = Tmpl.tmpl(attributesTmpl, attributeBindings, attributeModel);
+	document.body.appendChild(markup3);
+	
+	var markup4 = Tmpl.tmpl(styleTmpl, styleBindings, styleModel);
+	document.body.appendChild(markup4);
 	
 	setTimeout(function(){
 		personModel.firstName = "Spider";
@@ -38,5 +61,9 @@ document.addEventListener("DOMContentLoaded", function(){
 		controlModel.button = "push me 2";
 		controlModel.select = "C";
 		controlModel.checkbox = true;
+		
+		attributeModel.link = "http://www.bing.com";
+		
+		styleModel.color = "#f00";
 	}, 3000);
 }, true);
