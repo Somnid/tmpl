@@ -2,32 +2,109 @@ var Tmpl = (function(){
 
     function tmpl(templateElement, bindings, data){
         var docfrag = document.importNode(templateElement.content, true);
-        Object.observe(data, dataChanged.bind({
-            elements : getDocfragChildList(docfrag), //docfrags lose all their nodes when they append so track them directly
+        var elements = getDocfragChildList(docfrag);
+        
+        Object.observe(data, objectChanged.bind({
+            elements : elements, //docfrags lose all their nodes when they append so track them directly
             bindings : bindings
         }));
+        
         for(var key in bindings){
-          var element = docfrag.querySelector(key);
-          if(!element){
-            console.warn("Element: " + key + " did not exist");
-            return;
-          }
-          setElement(element, traverseObjectProps(data, bindings[key]));
+          updateBinding(key, bindings, elements, data);
         }
         return docfrag;
     }
 
-    function dataChanged(changes){
+    function objectChanged(changes){
         changes.forEach(propChanged.bind(this));
     }
 
     function propChanged(change){
-        for(var key in this.bindings){
-            var element = queryElementInList(this.elements, key);
-            if(element && getFirstLevelProp(this.bindings[key]) == change.name){
-              setElement(element, traverseObjectProps(change.object, this.bindings[key]) || "");
-            }
+      for(var key in this.bindings){
+        updateBinding(key, this.bindings, this.elements, change.object, change.name);
+      }
+    }
+    
+    function updateBinding(bindKey, bindings, elements, data, changedProp){
+      var key = getDeepKey(bindKey);
+      var accessor = bindings[bindKey];
+      var matchingElements = queryElementInList(elements, key.selector);
+      
+	    if(matchingElements.length === 0){
+		    console.error("element: " + key.selector + " did not exist in scope.");
+		    return;
+	    }
+      
+      if(!changedProp || getFirstLevelProp(accessor) == changedProp){
+        var value = traverseObjectProps(data, accessor);
+        if(key.attribute){
+          setElementAttributes(matchingElements, key.attribute, value);
+        }else if(key.style){
+          setElementStyles(matchingElements, key.style, value);
+        }else{
+          setElementValues(matchingElements, value);
         }
+      }
+    }
+    
+    function getDeepKey(key){
+      if(key.indexOf("!") != -1){
+        var attrKeySplit = key.split("!");
+        return {
+          selector : attrKeySplit[0],
+          attribute : attrKeySplit[1]
+        };
+      }else if(key.indexOf("$") != -1){
+        var styleKeySplit = key.split("$");
+        return {
+          selector : styleKeySplit[0],
+          style : styleKeySplit[1]
+        };
+      }else{
+        return {
+          selector : key
+        };
+      }
+    }
+    
+    function setElementValues(elements, value){
+      for(var i = 0; i < elements.length; i++){
+        setValue(elements[i], value);
+      }
+    }
+    
+    function setElementAttributes(elements, attributeKey, value){
+      for(var i = 0; i < elements.length; i++){
+        setAttribute(elements[i], attributeKey, value);
+      }
+    }
+    
+    function setElementStyles(elements, styleKey, value){
+      for(var i = 0; i < elements.length; i++){
+        setStyle(elements[i], styleKey, value);
+      }
+    }
+    
+    function setValue(element, value){
+      var elementType =  element.tagName.toUpperCase();
+
+      if(elementType == "INPUT" || elementType == "SELECT"){
+        if(element.type.toUpperCase() == "CHECKBOX"){
+          element.checked = value;
+        }else{
+          element.value = value;
+        }
+      }else{
+        element.textContent = value;
+      }
+    }
+    
+    function setAttribute(element, attributeKey, value){
+      element.setAttribute(attributeKey, value);
+    }
+    
+    function setStyle(element, styleKey, value){
+      element.style[styleKey] = value;
     }
 
     function traverseObjectProps(obj, accessor){
@@ -50,16 +127,21 @@ var Tmpl = (function(){
     }
 
     function queryElementInList(elements, selector){
+      var matchingElements = [];
       for(var i = 0; i < elements.length; i++){
-        var el = elements[i].parentNode.querySelector(selector); //need parent because this can include self
-        if(el && ancestorOrSelf(elements[i], el)){ //check that we didn't find on some unrelated branch off parent
-          return el;
+        var foundElements = elements[i].parentNode.querySelectorAll(selector); //need parent because this can include self
+        if(foundElements.length > 0){
+          for(var j = 0; j < foundElements.length; j++){
+            if(isAncestorOrSelf(elements[i], foundElements[j])){ //check that we didn't find on some unrelated branch off parent
+              matchingElements.push(foundElements[j]);
+            }
+          }
         }
       }
-      return null;
+      return matchingElements;
     }
 
-    function ancestorOrSelf(thisNode, nodeToTest){
+    function isAncestorOrSelf(thisNode, nodeToTest){
       while(thisNode != nodeToTest){
         if(nodeToTest.parentNode){
           nodeToTest = nodeToTest.parentNode;
@@ -76,19 +158,6 @@ var Tmpl = (function(){
         list.push(docfrag.children[i]);
       }
       return list;
-    }
-    
-    function setElement(element, value){
-      var elementType =  element.tagName.toUpperCase();
-      if(elementType == "INPUT" || elementType == "SELECT"){
-        if(element.type.toUpperCase() == "CHECKBOX"){
-          element.checked = value;
-        }else{
-          element.value = value;
-        }
-      }else{
-        element.textContent = value;
-      }
     }
 
     return {
