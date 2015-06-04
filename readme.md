@@ -34,3 +34,24 @@ var personModel = {
 
 var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);
 ```
+
+You can target attributes with "!":
+
+```
+var attributeBindings = {
+	".link!href" : "link",
+	".link" : "link"
+};
+```
+
+The link's href with change to the model.link.
+
+Because styles are so important in html there's a style binding as well "$":
+
+```
+var styleBindings = {
+  "div$background-color" : "color",
+};
+```
+
+This will change the background-color of div to the value of model.color.
