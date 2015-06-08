@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	var controlTmpl = document.getElementById("controls");
 	var attributesTmpl = document.getElementById("attributes");
 	var styleTmpl = document.getElementById("style");
+	var existing = document.getElementById("existing");
 	
 	var personBindings = {
 		".first-name" : "firstName",
@@ -41,6 +42,13 @@ document.addEventListener("DOMContentLoaded", function(){
 	  color : "#000"
 	};
 	
+	var existBindings = {
+	  "label" : "message"
+	};
+	var existModel = {
+	  "message" : "I exist"
+	};
+	
 	var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);
 	document.body.appendChild(markup);
 	
@@ -52,6 +60,8 @@ document.addEventListener("DOMContentLoaded", function(){
 	
 	var markup4 = Tmpl.tmpl(styleTmpl, styleBindings, styleModel);
 	document.body.appendChild(markup4);
+	
+	Tmpl.tmpl(existing, existBindings, existModel);
 	
 	setTimeout(function(){
 		personModel.firstName = "Spider";
@@ -65,5 +75,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		attributeModel.link = "http://www.bing.com";
 		
 		styleModel.color = "#f00";
+		
+		existModel.message = "...and I change";
 	}, 3000);
 }, true);
