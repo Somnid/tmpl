@@ -49,6 +49,10 @@ var Tmpl = (function(){
           setElementAttributes(matchingElements, key.attribute, value);
         }else if(key.style){
           setElementStyles(matchingElements, key.style, value);
+        }else if(key.class){
+          setElementClasses(matchingElements, key.class, value);
+        }else if(key.html){
+          setElementHtml(matchingElements, value);
         }else{
           setElementValues(matchingElements, value);
         }
@@ -65,20 +69,44 @@ var Tmpl = (function(){
       }
       
       var styleRegEx = /\$[^=].*$/; //need to filter out $= which is valid in css 
-      var styleMatch = styleRegEx.exec(key);
-      var styleKey = styleMatch ? styleMatch[0].substr(1) : null;
-      
+      var styleKey = getDeepKeyPart(key, styleRegEx, "style");
       if(styleKey){
-        var styleSelect = key.replace(styleRegEx, "");
+        return styleKey;
+      }
+      
+      var classRegEx = /\^[^=].*$/; //need to filter out $= which is valid in css 
+      var classKey = getDeepKeyPart(key, classRegEx, "class");
+      if(classKey){
+        return classKey;
+      }
+      
+      var htmlRegEx = /->$/;
+      var htmlKey = htmlRegEx.test(key);
+      if(htmlKey){
         return {
-          selector : styleSelect,
-          style : styleKey
+          selector : key.replace(htmlRegEx, ""),
+          html : true
         };
       }
       
       return {
           selector : key
       };
+    }
+    
+    function getDeepKeyPart(key, regEx, componentName){
+      var match = regEx.exec(key);
+      var componentKey = match ? match[0].substr(1) : null;
+      
+      if(componentKey){
+        var componentSelect = key.replace(regEx, "");
+        var keyObject = {
+          selector : componentSelect,
+        };
+        keyObject[componentName] = componentKey;
+        return keyObject;
+      }
+      return null;
     }
     
     function setElementValues(elements, value){
@@ -96,6 +124,18 @@ var Tmpl = (function(){
     function setElementStyles(elements, styleKey, value){
       for(var i = 0; i < elements.length; i++){
         setStyle(elements[i], styleKey, value);
+      }
+    }
+    
+    function setElementClasses(elements, classKey, value){
+      for(var i = 0; i < elements.length; i++){
+        setClass(elements[i], classKey, value);
+      }
+    }
+    
+    function setElementHtml(elements, value){
+      for(var i = 0; i < elements.length; i++){
+        setHtml(elements[i], value);
       }
     }
     
@@ -119,6 +159,14 @@ var Tmpl = (function(){
     
     function setStyle(element, styleKey, value){
       element.style[styleKey] = value;
+    }
+    
+    function setClass(element, classKey, value){
+      element.classList.toggle(classKey, !!value);
+    }
+    
+    function setHtml(element, value){
+      element.innerHTML = value;
     }
 
     function traverseObjectProps(obj, accessor){
