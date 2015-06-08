@@ -55,3 +55,37 @@ var styleBindings = {
 ```
 
 This will change the background-color of div to the value of model.color.
+
+Classes also get a binding "^":
+
+```
+var classBindings = {
+  "div^hidden" : "value"
+};
+```
+
+This will toggle the class based on the truthy value of mode.value
+
+If you need to instead change the html end the selector with "->"
+
+```
+<template id="template">
+  <div></div>
+</template>
+
+var htmlModel = {
+  value : "<span>inner</span>"
+};
+
+var htmlBindings = {
+  "div->" : "value"
+};
+```
+
+This will fill the innerHTML with model.value. In this case it would create:
+
+```
+<div>
+  <span>inner</span>
+</div>
+```

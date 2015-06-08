@@ -102,3 +102,78 @@ QUnit.test("changes existing markup on change", function(assert){
     done();
 	}, 0);
 });
+
+QUnit.test("templates attribute immediately", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><a class='link'></a></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    ".link!href" : "value"
+  };
+  var testModel = {
+    value : "http://www.google.com/"
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var value = element.querySelector(".link").href;
+	assert.equal(value, "http://www.google.com/", "set attribute");
+});
+
+QUnit.test("templates style immediately", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><div class='rect'></div></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    ".rect$backgroundColor" : "value"
+  };
+  var testModel = {
+    value : "#f00"
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var value = element.querySelector(".rect").style.backgroundColor;
+	assert.equal(value, "rgb(255, 0, 0)", "set style");
+});
+
+QUnit.test("adds class immediately", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><div class='rect'></div></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    ".rect^hidden" : "value"
+  };
+  var testModel = {
+    value : true
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var value = element.querySelector(".rect").classList.contains("hidden");
+	assert.equal(value, true, "added class");
+});
+
+QUnit.test("removes class immediately", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><div class='rect hidden'></div></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    ".rect^hidden" : "value"
+  };
+  var testModel = {
+    value : false
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var value = element.querySelector(".rect").classList.contains("hidden");
+	assert.equal(value, false, "removed class");
+});
+
+QUnit.test("sets html immediately", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><div class='rect'></div></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    ".rect->" : "value"
+  };
+  var testModel = {
+    value : "<span class='inner'>inner</span>"
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var value = element.querySelector(".rect").querySelector(".inner").textContent;
+	assert.equal(value, "inner", "added html");
+});
