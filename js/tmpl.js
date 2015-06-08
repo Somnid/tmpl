@@ -1,8 +1,16 @@
 var Tmpl = (function(){
 
     function tmpl(templateElement, bindings, data){
-        var docfrag = document.importNode(templateElement.content, true);
-        var elements = getDocfragChildList(docfrag);
+        var docFrag;
+        var elements;
+        
+        if(templateElement.tagName == "TEMPLATE"){
+          docfrag = document.importNode(templateElement.content, true);
+          
+        }else{
+          docfrag = templateElement;
+        }
+        elements = getDocfragChildList(docfrag);
         
         Object.observe(data, objectChanged.bind({
             elements : elements, //docfrags lose all their nodes when they append so track them directly
