@@ -173,8 +173,8 @@ var Tmpl = (function(){
       var keys = accessor.split(".");
       var prop = obj;
       for(var i = 0; i < keys.length; i++){
-        if(keys[i]){
-			    if(prop[keys[i]]){
+        if(keys[i] !== undefined){
+			    if(prop[keys[i]] !== undefined){
 				    prop = prop[keys[i]];
 			    }else{
 				    return null;
