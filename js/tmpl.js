@@ -19,6 +19,7 @@ var Tmpl = (function(){
         
         for(var key in bindings){
           updateBinding(key, bindings, elements, data);
+          setInputHandlers(key, bindings, elements, data);
         }
         return docfrag;
     }
@@ -36,7 +37,7 @@ var Tmpl = (function(){
     function updateBinding(bindKey, bindings, elements, data, changedProp){
       var key = getDeepKey(bindKey);
       var accessor = bindings[bindKey];
-      var matchingElements = queryElementInList(elements, key.selector);
+      var matchingElements = queryElementsInList(elements, key.selector);
       
 	    if(matchingElements.length === 0){
 		    console.error("element: " + key.selector + " did not exist in scope.");
@@ -56,6 +57,34 @@ var Tmpl = (function(){
         }else{
           setElementValues(matchingElements, value);
         }
+      }
+    }
+    
+    function setInputHandlers(bindKey, bindings, elements, data){
+      var key = getDeepKey(bindKey);
+      if(key.doubleBind){
+        var matchingElements = queryElementsInList(elements, key.selector);
+        for(var i = 0; i < matchingElements.length; i++){
+          reverseBind(matchingElements[i], bindings[bindKey], data);
+        }
+      }
+    }
+
+    function reverseBind(element, bindValue, data){
+      if(element.tagName == "INPUT"){
+        if(element.type.toUpperCase() == "CHECKBOX"){
+          element.addEventListener("change", function(){
+            setObjectProp(data, bindValue, element.checked);
+          });
+        }else{
+          element.addEventListener("input", function(){
+            setObjectProp(data, bindValue, element.value);
+          });
+        }
+      }if(element.tagName == "SELECT"){
+        element.addEventListener("change", function(){
+          setObjectProp(data, bindValue, element.value);
+        }); 
       }
     }
     
@@ -86,6 +115,14 @@ var Tmpl = (function(){
         return {
           selector : key.replace(htmlRegEx, ""),
           html : true
+        };
+      }
+      var doubleBindRegEx = /^<-/;
+      var doubleBindKey = doubleBindRegEx.test(key);
+      if(doubleBindKey){
+        return {
+          selector : key.substr(2),
+          doubleBind : true
         };
       }
       
@@ -183,12 +220,31 @@ var Tmpl = (function(){
       }
       return prop;
     }
+    
+    function setObjectProp(obj, accessor, value){
+      var keys = accessor.split(".");
+      var prop = obj;
+      for(var i = 0; i < keys.length-1; i++){
+        if(keys[i] !== undefined){
+			    if(prop[keys[i]] !== undefined){
+				    prop = prop[keys[i]];
+			    }else{
+				    console.error("Could not find property:", obj, accessor);
+			    }
+        }
+      }
+      if(prop[keys[keys.length-1]] !== undefined){
+        prop[keys[keys.length-1]] = value;
+      }else{
+        console.error("Could not find property:", obj, accessor);
+      }
+    }
 
     function getFirstLevelProp(accessor){
       return accessor.split(".")[0];
     }
 
-    function queryElementInList(elements, selector){
+    function queryElementsInList(elements, selector){
       var matchingElements = [];
       for(var i = 0; i < elements.length; i++){
         var foundElements = elements[i].parentNode.querySelectorAll(selector); //need parent because this can include self
