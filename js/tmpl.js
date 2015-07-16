@@ -71,7 +71,7 @@ var Tmpl = (function(){
     }
 
     function reverseBind(element, bindValue, data){
-      if(element.tagName == "INPUT"){
+      if(element.tagName == "INPUT" || element.tagName == "TEXTAREA"){
         if(element.type.toUpperCase() == "CHECKBOX"){
           element.addEventListener("change", function(){
             setObjectProp(data, bindValue, element.checked);
@@ -179,7 +179,7 @@ var Tmpl = (function(){
     function setValue(element, value){
       var elementType =  element.tagName.toUpperCase();
 
-      if(elementType == "INPUT" || elementType == "SELECT"){
+      if(elementType == "INPUT" || elementType == "SELECT" || elementType == "TEXTAREA"){
         if(element.type.toUpperCase() == "CHECKBOX"){
           element.checked = value;
         }else{
