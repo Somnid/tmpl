@@ -1,7 +1,7 @@
 Tmpl
 ====
 
-Tmpl uses Object.observe and HTML native templates to create a very light-weight templating solution that features one-way binding.  It's also programmatic so you aren't polluting your markup with garbage.
+Tmpl uses Object.observe and HTML native templates to create a very light-weight templating solution that features two-way binding.  It's also programmatic so you aren't polluting your markup with garbage.
 
 To use pass in your template element object, a hash of bindings with keys equal to an element selector off the template root and a value representing to the property you wish to bind to it's innerText (Note "object.property" notation is supported for deeper properties though the updates will only happen on the root object).  The 3rd argument is the object you are binding to.
 
@@ -89,3 +89,17 @@ This will fill the innerHTML with model.value. In this case it would create:
   <span>inner</span>
 </div>
 ```
+
+Two way binds start with "<-"
+
+```
+<template id="template">
+  <input type=text />
+</template>
+
+var classBindings = {
+  "<-input" : "value"
+};
+```
+
+This works for inputs, textarea, checkboxs and selects and will bind the UI value to the model on change or input where applicable.
