@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	var attributesTmpl = document.getElementById("attributes");
 	var styleTmpl = document.getElementById("style");
 	var existing = document.getElementById("existing");
+	var doubleBindTmpl = document.getElementById("double-bind");
 	
 	var personBindings = {
 		".first-name" : "firstName",
@@ -43,10 +44,24 @@ document.addEventListener("DOMContentLoaded", function(){
 	};
 	
 	var existBindings = {
-	  "label" : "message"
+	  ".label" : "message"
 	};
 	var existModel = {
 	  "message" : "I exist"
+	};
+	
+	var doubleBindBindings = {
+	  "<-.bind-input" : "message",
+	  "<-.bind-output" : "message",
+	  "<-.check-bind-input" : "checked",
+	  "<-.check-bind-output" : "checked",
+	  "<-.select-bind-output" : "value",
+	  "<-.select-bind-input" : "value"
+	};
+	var doubleBindModel = {
+	  "message" : "Lorem Ipsum",
+	  "checked" : false,
+	  "value" : "A"
 	};
 	
 	var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);
@@ -62,6 +77,9 @@ document.addEventListener("DOMContentLoaded", function(){
 	document.body.appendChild(markup4);
 	
 	Tmpl.tmpl(existing, existBindings, existModel);
+	
+	var markup5 = Tmpl.tmpl(doubleBindTmpl, doubleBindBindings, doubleBindModel);
+	document.body.appendChild(markup5);
 	
 	setTimeout(function(){
 		personModel.firstName = "Spider";
