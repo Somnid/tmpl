@@ -177,3 +177,70 @@ QUnit.test("sets html immediately", function(assert){
   var value = element.querySelector(".rect").querySelector(".inner").textContent;
 	assert.equal(value, "inner", "added html");
 });
+
+QUnit.test("changes model on text input", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><input type='text' class='input' /></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "<-.input" : "value"
+  };
+  var testModel = {
+    value : "Hello World"
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var input = element.querySelector(".input");
+  input.value = "Lorem Ipsum";
+  TestUtil.fireEvent(input, "input");
+	assert.equal(testModel.value, "Lorem Ipsum", "changed model on input");
+});
+
+QUnit.test("changes model on text input for textarea", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><textarea class='input'></textarea></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "<-.input" : "value"
+  };
+  var testModel = {
+    value : "Hello World"
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var input = element.querySelector(".input");
+  input.value = "Lorem Ipsum";
+  TestUtil.fireEvent(input, "input");
+	assert.equal(testModel.value, "Lorem Ipsum", "changed model on input");
+});
+
+QUnit.test("changes model on check change", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><input type='checkbox' class='input' /></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "<-.input" : "value"
+  };
+  var testModel = {
+    value : false
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var input = element.querySelector(".input");
+  input.checked = true;
+  TestUtil.fireEvent(input, "change");
+	assert.equal(testModel.value, true, "changed model on change");
+});
+QUnit.test("changes model on select change", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><select class='input'><option value='a'>A</option><option value='b'>B</option></select></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "<-.input" : "value"
+  };
+  var testModel = {
+    value : "a"
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var input = element.querySelector(".input");
+  input.value = "b";
+  TestUtil.fireEvent(input, "change");
+	assert.equal(testModel.value, "b", "changed model on change");
+});
