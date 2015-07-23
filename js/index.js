@@ -1,16 +1,17 @@
 document.addEventListener("DOMContentLoaded", function(){
-	var personTmpl = document.getElementById("person");
+	var textTmpl = document.getElementById("person");
 	var controlTmpl = document.getElementById("controls");
 	var attributesTmpl = document.getElementById("attributes");
 	var styleTmpl = document.getElementById("style");
 	var existing = document.getElementById("existing");
 	var doubleBindTmpl = document.getElementById("double-bind");
+	var listTmpl = document.getElementById("list-tmpl");
 	
-	var personBindings = {
+	var textBindings = {
 		".first-name" : "firstName",
 		".last-name" : "lastName"
 	};
-	var personModel = {
+	var textModel = {
 		firstName : "Peter",
 		lastName : "Parker"
 	};
@@ -64,26 +65,35 @@ document.addEventListener("DOMContentLoaded", function(){
 	  "value" : "A"
 	};
 	
-	var markup = Tmpl.tmpl(personTmpl, personBindings, personModel);
-	document.body.appendChild(markup);
+	var listModel = [
+	  {
+	    "value" : 1
+	  },
+	  {
+	    "value" : 2
+	  }
+	];
+	
+	var markup = Tmpl.tmpl(textTmpl, textBindings, textModel);
+	document.querySelector("#text-test").appendChild(markup);
 	
 	var markup2 = Tmpl.tmpl(controlTmpl, controlBindings, controlModel);
-	document.body.appendChild(markup2);
+	document.querySelector("#controls-test").appendChild(markup2);
 	
 	var markup3 = Tmpl.tmpl(attributesTmpl, attributeBindings, attributeModel);
-	document.body.appendChild(markup3);
+	document.querySelector("#attributes-test").appendChild(markup3);
 	
 	var markup4 = Tmpl.tmpl(styleTmpl, styleBindings, styleModel);
-	document.body.appendChild(markup4);
+	document.querySelector("#style-test").appendChild(markup4);
 	
 	Tmpl.tmpl(existing, existBindings, existModel);
 	
 	var markup5 = Tmpl.tmpl(doubleBindTmpl, doubleBindBindings, doubleBindModel);
-	document.body.appendChild(markup5);
+	document.querySelector("#double-bind-test").appendChild(markup5);
 	
 	setTimeout(function(){
-		personModel.firstName = "Spider";
-		personModel.lastName = "Man";
+		textModel.firstName = "Spider";
+		textModel.lastName = "Man";
 		
 		controlModel.text = "lorem ipsum 2";
 		controlModel.button = "push me 2";
