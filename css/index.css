@@ -20,3 +20,9 @@ input[type='text']{
 	width: 100%;
 	border: 1px solid black;
 }
+
+section {
+  background : #efefef;
+  padding: 15px;
+  margin: 15px;
+}

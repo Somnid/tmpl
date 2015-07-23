@@ -8,44 +8,71 @@
 	<body>
 		<div>
 		</div>
-		<div id="existing">
-		  <span class="label">something something</span>
-		</div>
-		<template id="person">
-			<span class="first-name"></span>
-			<span class="last-name"></span>
-		</template>
-		<template id="controls">
-		  <input id="text" type="text" />
-		  <button id="button"></button>
-		  <select id="select">
-		    <option value="A">A</option>
-		    <option value="B">B</option>
-		    <option value="C">C</option>
-		    <option value="D">D</option>
-		  </select>
-		  <input type="checkbox" id="checkbox" />
-		</template>
-		<template id="attributes">
-			<a class="link"></a>
-		</template>
-		<template id="style">
-			<div style="width:30px;height:30px;margin-bottom:10px"></div>
-			<div style="width:30px;height:30px"></div>
-		</template>
-		<template id="double-bind">
-		  <div class="bind-output"></div>
-		  <input type="text" class="bind-input" />
-		  <div class="check-bind-output"></div>
-		  <input type="checkbox" class="check-bind-input" />
-		  <div class="select-bind-output"></div>
-		  <select class="select-bind-input">
-		    <option value="A">A</option>
-		    <option value="B">B</option>
-		    <option value="C">C</option>
-		    <option value="D">D</option>
-		  </select>
-		</template>
+		
+		<section id="existing-test">
+  		<div id="existing">
+  		  <span class="label">something something</span>
+  		</div>
+		</section>
+		
+		<section id="text-test">
+  		<template id="person">
+  			<span class="first-name"></span>
+  			<span class="last-name"></span>
+  		</template>
+		</section>
+		
+		<section id="controls-test">
+  		<template id="controls">
+  		  <input id="text" type="text" />
+  		  <button id="button"></button>
+  		  <select id="select">
+  		    <option value="A">A</option>
+  		    <option value="B">B</option>
+  		    <option value="C">C</option>
+  		    <option value="D">D</option>
+  		  </select>
+  		  <input type="checkbox" id="checkbox" />
+  		</template>
+		</section>
+		
+		<section id="attributes-test">
+  		<template id="attributes">
+  			<a class="link"></a>
+  		</template>
+		</section>
+		
+		<section id="style-test">
+  		<template id="style">
+  			<div style="width:30px;height:30px;margin-bottom:10px"></div>
+  			<div style="width:30px;height:30px"></div>
+  		</template>
+		</section>
+		
+		<section id="double-bind-test">
+  		<template id="double-bind">
+  		  <div class="bind-output"></div>
+  		  <input type="text" class="bind-input" />
+  		  <div class="check-bind-output"></div>
+  		  <input type="checkbox" class="check-bind-input" />
+  		  <div class="select-bind-output"></div>
+  		  <select class="select-bind-input">
+  		    <option value="A">A</option>
+  		    <option value="B">B</option>
+  		    <option value="C">C</option>
+  		    <option value="D">D</option>
+  		  </select>
+  		</template>
+		</section>
+		
+		<section id="list-test">
+  		<button id="list-add">Add</button>
+  		<template id="list-tmpl">
+  		  <span class="value"></span>
+  		</template>
+		</section>
+		
+		
 		<script src="js/tmpl.js"></script>
 		<script src="js/index.js"></script>
 	</body>
