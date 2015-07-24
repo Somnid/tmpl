@@ -13,6 +13,7 @@ var Tmpl = (function(){
           docfrag = templateElement;
         }
         elements = getDocfragChildList(docfrag);
+        tagElements(elements, data);
         
         Object.observe(data, objectChanged.bind({
             elements : elements, //docfrags lose all their nodes when they append so track them directly
@@ -37,14 +38,14 @@ var Tmpl = (function(){
       for(var i = 0; i < data.length; i++){
         var itemFrag = tmpl(templateElement, bindings, data[i]);
         var childElements = getDocfragChildList(itemFrag);
-        tagElements(childElements, data[i]);
         elements = elements.concat(childElements);
         docFrag.appendChild(itemFrag);
       }
       
       Object.observe(data, arrayChanged.bind({
         bindings : bindings,
-        elements : elements
+        elements : elements,
+        template : templateElement
       }));
       
       return docFrag;
@@ -58,8 +59,8 @@ var Tmpl = (function(){
       for(var i = 0; i < changes.length; i++){
         if(changes[i].type == "delete" && isNumber(changes[i].name)){
           remove(this.elements, changes[i].oldValue);
-        }else if(changes[i].type == "add"){
-          console.log("add"); 
+        }else if(changes[i].type == "add" && isNumber(changes[i].name)){
+          this.elements[0].parentElement.appendChild(tmpl(this.template, this.bindings, changes[i].object[changes[i].name]));
         }
       }
     }
@@ -316,7 +317,7 @@ var Tmpl = (function(){
     
     function tagElements(elements, data){
       for(var i = 0; i < elements.length; i++){
-        var id = listId();
+        var id = listId.next().value;
         elements[i][tagSymbol] = id;
         data[tagSymbol] = id;
       }
@@ -361,9 +362,11 @@ var Tmpl = (function(){
       return !isNaN(str);
     }
     
-    function *listId(){
-      yield i++;
-    }
+    var listId = (function*(){
+      var index = 0;
+      while(true)
+        yield index++;
+    })();
 
     return {
         tmpl : tmpl,

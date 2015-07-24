@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", function(){
 	    "value" : 2
 	  }
 	];
+	var listBindings = {
+    ".value" : "value"
+	};
 	
 	var markup = Tmpl.tmpl(textTmpl, textBindings, textModel);
 	document.querySelector("#text-test").appendChild(markup);
@@ -90,6 +93,23 @@ document.addEventListener("DOMContentLoaded", function(){
 	
 	var markup5 = Tmpl.tmpl(doubleBindTmpl, doubleBindBindings, doubleBindModel);
 	document.querySelector("#double-bind-test").appendChild(markup5);
+	
+	var markup6 = Tmpl.tmplList(listTmpl, listBindings, listModel);
+	document.querySelector("#list-test").appendChild(markup6);
+	document.querySelector("#list-add").addEventListener("click", function(){
+	  listModel.push({
+	    "value" : id.next().value
+	  });
+	});
+	document.querySelector("#list-remove").addEventListener("click", function(){
+	  listModel.pop();
+	});
+	
+	var id = (function*(){
+    var index = 3;
+    while(true)
+      yield index++;
+	})();
 	
 	setTimeout(function(){
 		textModel.firstName = "Spider";
