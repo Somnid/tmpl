@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function(){
 	var existing = document.getElementById("existing");
 	var doubleBindTmpl = document.getElementById("double-bind");
 	var listTmpl = document.getElementById("list-tmpl");
+	var eventTmpl = document.getElementById("event-tmpl");
 	
 	var textBindings = {
 		".first-name" : "firstName",
@@ -77,6 +78,13 @@ document.addEventListener("DOMContentLoaded", function(){
     ".value" : "value"
 	};
 	
+	var eventModel = {
+	  "alert" : function(){ alert("pushed!");  }
+	};
+	var eventBindings = {
+	  "{click}.btn" : "alert"
+	};
+	
 	var markup = Tmpl.tmpl(textTmpl, textBindings, textModel);
 	document.querySelector("#text-test").appendChild(markup);
 	
@@ -104,12 +112,14 @@ document.addEventListener("DOMContentLoaded", function(){
 	document.querySelector("#list-remove").addEventListener("click", function(){
 	  listModel.pop();
 	});
-	
 	var id = (function*(){
     var index = 3;
     while(true)
       yield index++;
 	})();
+	
+	var markup7 = Tmpl.tmpl(eventTmpl, eventBindings, eventModel);
+	document.querySelector("#event-test").appendChild(markup7);
 	
 	setTimeout(function(){
 		textModel.firstName = "Spider";

@@ -131,7 +131,7 @@ var Tmpl = (function(){
     
     function propChanged(change){
       for(var key in this.model.bindings){
-        this.updateBinding(key, change.object, change.name);
+        this.updateBinding(key, change.object, change.name, change.oldValue);
       }
     }
     
@@ -145,7 +145,7 @@ var Tmpl = (function(){
       }
     }
     
-    function updateBinding(bindKey, data, changedProp){
+    function updateBinding(bindKey, data, changedProp, oldValue){
       var key = getDeepKey(bindKey);
       var accessor = this.model.bindings[bindKey];
       var matchingElements = queryElementsInList(this.model.elements, key.selector);
@@ -165,6 +165,8 @@ var Tmpl = (function(){
           setElementClasses(matchingElements, key.class, value);
         }else if(key.html){
           setElementHtml(matchingElements, value);
+        }else if(key.event){
+          setElementEvent(matchingElements, key.event, value, oldValue);
         }else{
           setElementValues(matchingElements, value);
         }
@@ -220,13 +222,13 @@ var Tmpl = (function(){
         };
       }
       
-      var styleRegEx = /\$[^=].*$/; //need to filter out $= which is valid in css 
+      var styleRegEx = /\$([^=].*)$/; //need to filter out $= which is valid in css 
       var styleKey = getDeepKeyPart(key, styleRegEx, "style");
       if(styleKey){
         return styleKey;
       }
       
-      var classRegEx = /\^[^=].*$/; //need to filter out $= which is valid in css 
+      var classRegEx = /\^([^=].*)$/; //need to filter out $= which is valid in css 
       var classKey = getDeepKeyPart(key, classRegEx, "class");
       if(classKey){
         return classKey;
@@ -249,6 +251,12 @@ var Tmpl = (function(){
         };
       }
       
+      var eventRegEx = /^{(.*?)}/;
+      var eventKey = getDeepKeyPart(key, eventRegEx, "event");
+      if(eventKey){
+        return eventKey;
+      }
+      
       return {
           selector : key
       };
@@ -256,7 +264,7 @@ var Tmpl = (function(){
     
     function getDeepKeyPart(key, regEx, componentName){
       var match = regEx.exec(key);
-      var componentKey = match ? match[0].substr(1) : null;
+      var componentKey = match ? match[1] : null;
       
       if(componentKey){
         var componentSelect = key.replace(regEx, "");
@@ -299,6 +307,12 @@ var Tmpl = (function(){
       }
     }
     
+    function setElementEvent(elements, event, handler, oldHandler){
+      for(var i = 0; i < elements.length; i++){
+        setEvent(elements[i], event, handler, oldHandler);
+      }
+    }
+    
     function setValue(element, value){
       var elementType =  element.tagName.toUpperCase();
 
@@ -327,6 +341,11 @@ var Tmpl = (function(){
     
     function setHtml(element, value){
       element.innerHTML = value;
+    }
+    
+    function setEvent(element, event, handler, oldHandler){
+        element.removeEventListener(event, oldHandler);
+        element.addEventListener(event, handler);
     }
 
     function traverseObjectProps(obj, accessor){

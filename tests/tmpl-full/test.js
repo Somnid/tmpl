@@ -360,3 +360,56 @@ QUnit.test("adds element if attached to DOM and previously empty", function(asse
     done();
   }, 0);
 });
+
+QUnit.test("attaches event listener", function(assert){
+  assert.expect(1);
+  
+  var done = assert.async();
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><button></button></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "{click}button" : "func"
+  };
+  var testModel = {
+    func : function(){
+      assert.ok(true);
+      done();
+    }
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  fixture.appendChild(element);
+  var button = fixture.querySelector("button");
+  
+  window.setTimeout(function(){
+    TestUtil.fireEvent(button, "click");
+  }, 0);
+});
+
+QUnit.test("re-attaches event listener", function(assert){
+  assert.expect(1);
+  
+  var done = assert.async();
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><button></button></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "{click}button" : "func"
+  };
+  var testModel = {
+    func : function(){
+      assert.false(true);
+    }
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  fixture.appendChild(element);
+  var button = fixture.querySelector("button");
+  
+  window.setTimeout(function(){
+    testModel.func = function(){
+      assert.ok(true);
+      done();
+    };
+    TestUtil.fireEvent(button, "click");
+  }, 0);
+});
