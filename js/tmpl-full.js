@@ -81,7 +81,9 @@ var Tmpl = (function(){
         return node instanceof HTMLElement;
       });
       if(removedElementNodes.length == this.model.elements.length){ //assumed to be stamping docfrag
-        this.model.parent = this.model.elements[0].parentElement;
+        if(this.model.elements[0].parentElement){
+          this.model.parent = this.model.elements[0].parentElement;
+        }
         this.parentObserver.disconnect();
         this.attachParentObserver();
       }

@@ -297,3 +297,66 @@ QUnit.test("removes from list if array element is removed", function(assert){
     done();
   }, 0);
 });
+
+QUnit.test("adds element if added to array", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><span></span></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "span" : "value"
+  };
+  var testModel = [
+    {
+      value : "hello world"
+    },
+    {
+      value : "Lorem Ipsum"
+    }
+  ];
+  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  var spans = element.querySelectorAll("span");
+  assert.equal(spans.length, 2, "templated 2 items");
+  testModel.push({
+    value : "item 3"
+  });
+  var done = assert.async();
+  
+  window.setTimeout(function(){
+    spans = element.querySelectorAll("span");
+    assert.equal(spans.length, 3, "added 1 item");
+    assert.equal(spans[2].textContent, "item 3", "added item");
+    done();
+  }, 0);
+});
+
+QUnit.test("adds element if attached to DOM and previously empty", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><span></span></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "span" : "value"
+  };
+  var testModel = [
+    {
+      value : "hello world"
+    },
+    {
+      value : "Lorem Ipsum"
+    }
+  ];
+  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  fixture.appendChild(element);
+  testModel.pop();
+  testModel.pop();
+  testModel.push({
+    value : "item 3"
+  });
+  var done = assert.async();
+  
+  window.setTimeout(function(){
+    spans = fixture.querySelectorAll("span");
+    assert.equal(spans.length, 1, "added last item");
+    assert.equal(spans[0].textContent, "item 3", "added item");
+    done();
+  }, 0);
+});
