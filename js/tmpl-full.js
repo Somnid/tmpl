@@ -3,78 +3,150 @@ var Tmpl = (function(){
     var tagSymbol = Symbol("tag");
 
     function tmpl(templateElement, bindings, data){
-        var docFrag;
-        var elements;
-        
-        if(templateElement.tagName == "TEMPLATE"){
-          docfrag = document.importNode(templateElement.content, true);
-          
-        }else{
-          docfrag = templateElement;
-        }
-        elements = getDocfragChildList(docfrag);
-        tagElements(elements, data);
-        
-        Object.observe(data, objectChanged.bind({
-            elements : elements, //docfrags lose all their nodes when they append so track them directly
-            bindings : bindings
-        }));
-        
-        for(var key in bindings){
-          updateBinding(key, bindings, elements, data);
-          setInputHandlers(key, bindings, elements, data);
-        }
-        return docfrag;
+      var tmplData = {};
+      tmplData.model = {
+        templateElement : templateElement,
+        bindings : bindings,
+        data : data
+      };
+      bind(tmplData);
+      tmplData.init();
+
+      return tmplData.model.docFrag;
     }
     
     function tmplList(templateElement, bindings, data){
-      var docFrag = document.createDocumentFragment();
-      var elements = [];
+      var tmplData = {};
+      tmplData.model = {
+        templateElement : templateElement,
+        bindings : bindings,
+        data : data
+      };
+      bindList(tmplData);
+      tmplData.initList();
       
-      if(!Array.isArray(data)){
+      return tmplData.model.docFrag;
+    }
+    
+    function bind(tmplData){
+      tmplData.attachObserver = attachObserver.bind(tmplData);
+      tmplData.setBindings = setBindings.bind(tmplData);
+      tmplData.objectChanged = objectChanged.bind(tmplData);
+      tmplData.propChanged = propChanged.bind(tmplData);
+      tmplData.setInputHandlers = setInputHandlers.bind(tmplData);
+      tmplData.updateBinding = updateBinding.bind(tmplData);
+      tmplData.init = init.bind(tmplData);
+    }
+    
+    function bindList(tmplData){
+      tmplData.attachListObservers = attachListObservers.bind(tmplData);
+      tmplData.arrayChanged = arrayChanged.bind(tmplData);
+      tmplData.arrayPropChanged = arrayPropChanged.bind(tmplData);
+      tmplData.remove = remove.bind(tmplData);
+      tmplData.onParentMutation = onParentMutation.bind(tmplData);
+      tmplData.attachParentObserver = attachParentObserver.bind(tmplData);
+      tmplData.initList = initList.bind(tmplData);
+    }
+    
+    function init(){
+      this.model.docFrag = getTemplate(this.model.templateElement);
+      this.model.elements = getDocfragChildList(this.model.docFrag);
+      tagElements(this.model.elements, this.model.data);
+      this.attachObserver();
+      this.setBindings();
+    }
+    
+    function initList(){
+      this.model.docFrag = document.createDocumentFragment();
+      this.model.elements = [];
+      
+      if(!Array.isArray(this.model.data)){
         throw "Cannot use tmplList on a non-array";
       }
       
-      for(var i = 0; i < data.length; i++){
-        var itemFrag = tmpl(templateElement, bindings, data[i]);
+      for(var i = 0; i < this.model.data.length; i++){
+        var itemFrag = tmpl(this.model.templateElement, this.model.bindings, this.model.data[i]);
         var childElements = getDocfragChildList(itemFrag);
-        elements = elements.concat(childElements);
-        docFrag.appendChild(itemFrag);
+        this.model.elements = this.model.elements.concat(childElements);
+        this.model.docFrag.appendChild(itemFrag);
       }
       
-      Object.observe(data, arrayChanged.bind({
-        bindings : bindings,
-        elements : elements,
-        template : templateElement
-      }));
-      
-      return docFrag;
+      this.parentObserver = new MutationObserver(this.onParentMutation);
+      this.model.parent = this.model.docFrag;
+      this.attachListObservers();
+    }
+    
+    function onParentMutation(mutationRecord){
+      var removedElementNodes = arrayWhere(mutationRecord[0].removedNodes, function(node){
+        return node instanceof HTMLElement;
+      });
+      if(removedElementNodes.length == this.model.elements.length){ //assumed to be stamping docfrag
+        this.model.parent = this.model.elements[0].parentElement;
+        this.parentObserver.disconnect();
+        this.attachParentObserver();
+      }
+    }
+    
+    function getTemplate(templateElement){
+      if(templateElement.tagName == "TEMPLATE"){
+          return document.importNode(templateElement.content, true);
+        }
+        return templateElement;
+    }
+    
+    function attachObserver(){
+      Object.observe(this.model.data, this.objectChanged);
+    }
+    
+    function attachListObservers(){
+      Object.observe(this.model.data, this.arrayChanged);
+      this.attachParentObserver();
+    }
+    
+    function attachParentObserver(){
+      this.parentObserver.observe(this.model.parent, {
+        childList : true,
+        attributes : false,
+        characterData : false,
+        subtree : false,
+      });
+    }
+    
+    function setBindings(){
+      for(var key in this.model.bindings){
+        this.updateBinding(key, this.model.data);
+        this.setInputHandlers(key, this.model.data);
+      }
     }
 
     function objectChanged(changes){
-        changes.forEach(propChanged.bind(this));
+      changes.forEach(this.propChanged);
     }
     
     function arrayChanged(changes){
-      for(var i = 0; i < changes.length; i++){
-        if(changes[i].type == "delete" && isNumber(changes[i].name)){
-          remove(this.elements, changes[i].oldValue);
-        }else if(changes[i].type == "add" && isNumber(changes[i].name)){
-          this.elements[0].parentElement.appendChild(tmpl(this.template, this.bindings, changes[i].object[changes[i].name]));
-        }
-      }
+      changes.forEach(this.arrayPropChanged);
     }
-
+    
     function propChanged(change){
-      for(var key in this.bindings){
-        updateBinding(key, this.bindings, this.elements, change.object, change.name);
+      for(var key in this.model.bindings){
+        this.updateBinding(key, change.object, change.name);
       }
     }
     
-    function updateBinding(bindKey, bindings, elements, data, changedProp){
+    function arrayPropChanged(change){
+      if(change.type == "delete" && isNumber(change.name)){
+        this.remove(change.oldValue);
+      }else if(change.type == "add" && isNumber(change.name)){
+        var docFrag = tmpl(this.model.templateElement, this.model.bindings, change.object[change.name]);
+        this.model.elements = this.model.elements.concat(getDocfragChildList(docFrag));
+        this.model.parent.appendChild(docFrag);
+      }
+    }
+    
+    function updateBinding(bindKey, data, changedProp){
       var key = getDeepKey(bindKey);
-      var accessor = bindings[bindKey];
-      var matchingElements = queryElementsInList(elements, key.selector);
+      var accessor = this.model.bindings[bindKey];
+      var matchingElements = queryElementsInList(this.model.elements, key.selector);
       
 	    if(matchingElements.length === 0){
 		    console.error("element: " + key.selector + " did not exist in scope.");
@@ -97,15 +169,27 @@ var Tmpl = (function(){
       }
     }
     
-    function setInputHandlers(bindKey, bindings, elements, data){
+    function setInputHandlers(bindKey, data){
       var key = getDeepKey(bindKey);
       if(key.doubleBind){
-        var matchingElements = queryElementsInList(elements, key.selector);
+        var matchingElements = queryElementsInList(this.model.elements, key.selector);
         for(var i = 0; i < matchingElements.length; i++){
-          reverseBind(matchingElements[i], bindings[bindKey], data);
+          reverseBind(matchingElements[i], this.model.bindings[bindKey], data);
         }
       }
     }
+    
+    function remove(associatedItem){
+	    var associatedElements = arrayWhere(this.model.elements, function(element){
+	      return element[tagSymbol] == associatedItem[tagSymbol];
+	    });
+	    for(var i = 0; i < associatedElements.length; i++){
+	      this.model.elements = arrayRemoveWhere(this.model.elements, function(element){
+	        return element == associatedElements[i];
+	      });
+        removeElement(associatedElements[i]);
+	    }
+	  }
 
     function reverseBind(element, bindValue, data){
       if(element.tagName == "INPUT" || element.tagName == "TEXTAREA"){
@@ -323,6 +407,10 @@ var Tmpl = (function(){
       }
     }
     
+    function removeElement(element){
+      element.parentNode.removeChild(element);
+    }
+    
     function arrayFirst(array, whereFunction){
 		  for(var i = 0; i < array.length; i++){
 			  if(whereFunction(array[i])){
@@ -342,18 +430,17 @@ var Tmpl = (function(){
 		  return resultArray;
 	  }
 	  
-	  function remove(elements, associatedItem){
-	    var associatedElements = arrayWhere(elements, function(element){
-	      return element[tagSymbol] == associatedItem[tagSymbol];
-	    });
-	    for(var i = 0; i < associatedElements.length; i++){
-        removeElement(associatedElements[i]);
-	    }
+	  function arrayRemoveWhere(array, whereFunction){
+		  var remaining = [];
+	
+		  for (var i = 0; i < array.length; i++) {
+			  if (!whereFunction(array[i])){
+				  remaining.push(array[i]);
+			  }
+		  }
+	
+		  return remaining;
 	  }
-	  
-	  function removeElement(element){
-      element.parentNode.removeChild(element);
-    }
 	  
 	  function isNumber(str){
       if(str === null || str === ""){
