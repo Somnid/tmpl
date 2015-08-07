@@ -90,7 +90,7 @@ This will fill the innerHTML with model.value. In this case it would create:
 </div>
 ```
 
-Two way binds start with "<-"
+Two way binds start with '<\-'
 
 ```
 <template id="template">
@@ -103,3 +103,26 @@ var classBindings = {
 ```
 
 This works for inputs, textarea, checkboxs and selects and will bind the UI value to the model on change or input where applicable.
+
+Tmpl-full
+=========
+
+Tmpl-full trades leaness for power.  It has all the same things plus some nice QOL features to make things go a little faster, especially recommended for those who want something a little more frame-worky.
+Note that any new features will go to tmpl-full and tmpl is finished aside from bugs and refactoring.
+
+```
+<template id="template">
+  <span><span>
+</template>
+
+var listModel = [
+  { "value" : "hello world" },
+  { "value" : "lorem ipsum" }
+];
+
+var listBindings = {
+  "span" : "value"
+}
+
+Tmpl.tmplList(template, listModel, listBindings)
+```

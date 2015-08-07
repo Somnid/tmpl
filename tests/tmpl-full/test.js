@@ -398,7 +398,7 @@ QUnit.test("re-attaches event listener", function(assert){
   };
   var testModel = {
     func : function(){
-      assert.false(true);
+      assert.notOk(true);
     }
   };
   var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
@@ -410,6 +410,8 @@ QUnit.test("re-attaches event listener", function(assert){
       assert.ok(true);
       done();
     };
-    TestUtil.fireEvent(button, "click");
+    window.setTimeout(function(){
+      TestUtil.fireEvent(button, "click");
+    },0);
   }, 0);
 });
