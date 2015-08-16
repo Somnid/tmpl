@@ -1,6 +1,7 @@
 var Tmpl = (function(){
 
     var tagSymbol = Symbol("tag");
+    var tempSymbol = Symbol("temp");
 
     function tmpl(templateElement, bindings, data){
       var tmplData = {};
@@ -46,6 +47,7 @@ var Tmpl = (function(){
       tmplData.onParentMutation = onParentMutation.bind(tmplData);
       tmplData.attachParentObserver = attachParentObserver.bind(tmplData);
       tmplData.initList = initList.bind(tmplData);
+      tmplData.removeTempElement = removeTempElement.bind(tmplData);
     }
     
     function init(){
@@ -62,6 +64,13 @@ var Tmpl = (function(){
       
       if(!Array.isArray(this.model.data)){
         throw "Cannot use tmplList on a non-array";
+      }
+      
+      if(this.model.data.length === 0){
+        var temp = document.createElement("template");
+        temp[tempSymbol] = true;
+        this.model.docFrag.appendChild(temp);
+        this.model.elements.push(temp);
       }
       
       for(var i = 0; i < this.model.data.length; i++){
@@ -83,10 +92,23 @@ var Tmpl = (function(){
       if(removedElementNodes.length == this.model.elements.length){ //assumed to be stamping docfrag
         if(this.model.elements[0].parentElement){
           this.model.parent = this.model.elements[0].parentElement;
+          this.removeTempElement();
         }
         this.parentObserver.disconnect();
         this.attachParentObserver();
       }
+    }
+    
+    function removeTempElement(){
+      var tempElements = arrayWhere(this.model.elements, function(element){
+        return element[tempSymbol] === true;
+      });
+      for(var i = 0; i < tempElements.length; i++){
+        removeElement(tempElements[0]);
+      }
+      this.model.elements = arrayRemoveWhere(this.model.elements, function(element){
+        return element[tempSymbol] === true;
+      });
     }
     
     function getTemplate(templateElement){
@@ -157,7 +179,9 @@ var Tmpl = (function(){
       
       if(!changedProp || getFirstLevelProp(accessor) == changedProp){
         var value = traverseObjectProps(data, accessor);
-        if(key.attribute){
+        if(key.existsAttribute){
+          setExistsElementAttributes(matchingElements, key.existsAttribute, value); 
+        }else if(key.attribute){
           setElementAttributes(matchingElements, key.attribute, value);
         }else if(key.style){
           setElementStyles(matchingElements, key.style, value);
@@ -214,12 +238,16 @@ var Tmpl = (function(){
     }
     
     function getDeepKey(key){
-      if(key.indexOf("!") != -1){
-        var attrKeySplit = key.split("!");
-        return {
-          selector : attrKeySplit[0],
-          attribute : attrKeySplit[1]
-        };
+      var existAttrRegEx = /!{2}(.*)$/;
+      var existAttrKey = getDeepKeyPart(key, existAttrRegEx, "existsAttribute");
+      if(existAttrKey){
+        return existAttrKey;
+      }
+      
+      var attrRegEx = /\!(.*)$/;
+      var attrKey = getDeepKeyPart(key, attrRegEx, "attribute");
+      if(attrKey){
+        return attrKey;
       }
       
       var styleRegEx = /\$([^=].*)$/; //need to filter out $= which is valid in css 
@@ -228,7 +256,7 @@ var Tmpl = (function(){
         return styleKey;
       }
       
-      var classRegEx = /\^([^=].*)$/; //need to filter out $= which is valid in css 
+      var classRegEx = /\^([^=].*)$/; //need to filter out ^= which is valid in css 
       var classKey = getDeepKeyPart(key, classRegEx, "class");
       if(classKey){
         return classKey;
@@ -283,6 +311,12 @@ var Tmpl = (function(){
       }
     }
     
+    function setExistsElementAttributes(elements, attributeKey, value){
+      for(var i = 0; i < elements.length; i++){
+        setExistsAttribute(elements[i], attributeKey, value);
+      }
+    }
+    
     function setElementAttributes(elements, attributeKey, value){
       for(var i = 0; i < elements.length; i++){
         setAttribute(elements[i], attributeKey, value);
@@ -324,6 +358,14 @@ var Tmpl = (function(){
         }
       }else{
         element.textContent = value;
+      }
+    }
+    
+    function setExistsAttribute(element, attributeKey, value){
+      if(!!value){
+        element.setAttribute(attributeKey, "");
+      }else{
+        element.removeAttribute(attributeKey);
       }
     }
     

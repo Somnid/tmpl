@@ -103,6 +103,21 @@ QUnit.test("changes existing markup on change", function(assert){
 	}, 0);
 });
 
+QUnit.test("templates boolean attribute immediately", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><input class='input' /></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    ".input!!disabled" : "value"
+  };
+  var testModel = {
+    value : true
+  };
+  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var value = element.querySelector(".input").disabled;
+	assert.equal(value, true, "set attribute");
+});
+
 QUnit.test("templates attribute immediately", function(assert){
   var fixture = document.querySelector("#qunit-fixture");
   fixture.innerHTML = "<template id='test'><a class='link'></a></template>";
@@ -348,6 +363,29 @@ QUnit.test("adds element if attached to DOM and previously empty", function(asse
   fixture.appendChild(element);
   testModel.pop();
   testModel.pop();
+  testModel.push({
+    value : "item 3"
+  });
+  var done = assert.async();
+  
+  window.setTimeout(function(){
+    spans = fixture.querySelectorAll("span");
+    assert.equal(spans.length, 1, "added last item");
+    assert.equal(spans[0].textContent, "item 3", "added item");
+    done();
+  }, 0);
+});
+
+QUnit.test("adds element if array started empty", function(assert){
+  var fixture = document.querySelector("#qunit-fixture");
+  fixture.innerHTML = "<template id='test'><span></span></template>";
+  var testMarkup = document.querySelector("#test");
+  var testBindings = {
+    "span" : "value"
+  };
+  var testModel = [];
+  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  fixture.appendChild(element);
   testModel.push({
     value : "item 3"
   });
