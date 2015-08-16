@@ -110,6 +110,8 @@ Tmpl-full
 Tmpl-full trades leaness for power.  It has all the same things plus some nice QOL features to make things go a little faster, especially recommended for those who want something a little more frame-worky.
 Note that any new features will go to tmpl-full and tmpl is finished aside from bugs and refactoring.
 
+You can template lists which will also bind to the attributes on the array models.
+
 ```
 <template id="template">
   <span><span>
@@ -126,3 +128,38 @@ var listBindings = {
 
 Tmpl.tmplList(template, listModel, listBindings)
 ```
+
+You can toggle attribute existence with "!!":
+
+```
+var model = {
+  value : true
+}
+
+var attributeBindings = {
+	".input!!disabled" : "value"
+};
+```
+
+yeilds
+
+```
+<input class="input" disabled />
+```
+
+if model.value = false then
+
+```
+<input class="input" />
+```
+
+You can bind event handlers too which can be handy for templating lists
+
+```
+var model = {
+  handler : function(){ alert("!"); }
+}
+
+var eventBindings = {
+	"{click}button" : "handler"
+};
