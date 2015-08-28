@@ -256,6 +256,12 @@ var Tmpl = (function(){
         return styleKey;
       }
       
+      var exclusiveClassRegEx = /\^{2}([^=].*)$/; //need to filter out ^= which is valid in css 
+      var exclusiveClassKey = getDeepKeyPart(key, exclusiveClassRegEx, "exclusiveClass");
+      if(exclusiveClassKey){
+        return exclusiveClassKey;
+      }
+      
       var classRegEx = /\^([^=].*)$/; //need to filter out ^= which is valid in css 
       var classKey = getDeepKeyPart(key, classRegEx, "class");
       if(classKey){
@@ -367,6 +373,10 @@ var Tmpl = (function(){
       }else{
         element.removeAttribute(attributeKey);
       }
+    }
+    
+    function setExclusiveClass(element, classKey, previousClassKey, value){
+      //TODO
     }
     
     function setAttribute(element, attributeKey, value){
