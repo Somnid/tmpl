@@ -1,3 +1,5 @@
+Note: Currently in limbo following retraction of Object.observe
+
 Tmpl
 ====
 
