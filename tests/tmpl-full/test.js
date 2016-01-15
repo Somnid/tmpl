@@ -11,7 +11,7 @@ QUnit.test("templates a template immediately", function(assert){
   var testModel = {
     message : "Peter Parker"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".label").textContent;
 	assert.equal(value, "Peter Parker", "templated textContent");
 });
@@ -26,8 +26,8 @@ QUnit.test("changes a template on change", function(assert){
   var testModel = {
     message : "Peter Parker"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
-	testModel.message = "Spiderman";
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
+	model.message = "Spiderman";
 	var done = assert.async();
 	
   window.setTimeout(function(){
@@ -47,7 +47,7 @@ QUnit.test("templates a text input immediately", function(assert){
   var testModel = {
     message : "Lorem Ipsum"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".input").value;
 	assert.equal(value, "Lorem Ipsum", "templated value");
 });
@@ -62,7 +62,7 @@ QUnit.test("templates a checkbox immediately", function(assert){
   var testModel = {
     value : true
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".input").checked;
 	assert.equal(value, true, "templated check");
 });
@@ -77,7 +77,7 @@ QUnit.test("templates existing markup immediately", function(assert){
   var testModel = {
     message : "I exist!"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".label").textContent;
 	assert.equal(value, "I exist!");
 });
@@ -92,8 +92,8 @@ QUnit.test("changes existing markup on change", function(assert){
   var testModel = {
     message : "I exist!"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
-	testModel.message = "..and change!";
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
+	model.message = "..and change!";
 	var done = assert.async();
 	
   window.setTimeout(function(){
@@ -113,7 +113,7 @@ QUnit.test("templates boolean attribute immediately", function(assert){
   var testModel = {
     value : true
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".input").disabled;
 	assert.equal(value, true, "set attribute");
 });
@@ -128,7 +128,7 @@ QUnit.test("templates attribute immediately", function(assert){
   var testModel = {
     value : "http://www.google.com/"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".link").href;
 	assert.equal(value, "http://www.google.com/", "set attribute");
 });
@@ -143,7 +143,7 @@ QUnit.test("templates style immediately", function(assert){
   var testModel = {
     value : "#f00"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".rect").style.backgroundColor;
 	assert.equal(value, "rgb(255, 0, 0)", "set style");
 });
@@ -158,7 +158,7 @@ QUnit.test("adds class immediately", function(assert){
   var testModel = {
     value : true
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".rect").classList.contains("hidden");
 	assert.equal(value, true, "added class");
 });
@@ -173,7 +173,7 @@ QUnit.test("removes class immediately", function(assert){
   var testModel = {
     value : false
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".rect").classList.contains("hidden");
 	assert.equal(value, false, "removed class");
 });
@@ -188,7 +188,7 @@ QUnit.test("sets html immediately", function(assert){
   var testModel = {
     value : "<span class='inner'>inner</span>"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var value = element.querySelector(".rect").querySelector(".inner").textContent;
 	assert.equal(value, "inner", "added html");
 });
@@ -203,11 +203,11 @@ QUnit.test("changes model on text input", function(assert){
   var testModel = {
     value : "Hello World"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var input = element.querySelector(".input");
   input.value = "Lorem Ipsum";
   TestUtil.fireEvent(input, "input");
-	assert.equal(testModel.value, "Lorem Ipsum", "changed model on input");
+	assert.equal(model.value, "Lorem Ipsum", "changed model on input");
 });
 
 QUnit.test("changes model on text input for textarea", function(assert){
@@ -220,11 +220,11 @@ QUnit.test("changes model on text input for textarea", function(assert){
   var testModel = {
     value : "Hello World"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var input = element.querySelector(".input");
   input.value = "Lorem Ipsum";
   TestUtil.fireEvent(input, "input");
-	assert.equal(testModel.value, "Lorem Ipsum", "changed model on input");
+	assert.equal(model.value, "Lorem Ipsum", "changed model on input");
 });
 
 QUnit.test("changes model on check change", function(assert){
@@ -237,11 +237,11 @@ QUnit.test("changes model on check change", function(assert){
   var testModel = {
     value : false
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var input = element.querySelector(".input");
   input.checked = true;
   TestUtil.fireEvent(input, "change");
-	assert.equal(testModel.value, true, "changed model on change");
+	assert.equal(model.value, true, "changed model on change");
 });
 QUnit.test("changes model on select change", function(assert){
   var fixture = document.querySelector("#qunit-fixture");
@@ -253,11 +253,11 @@ QUnit.test("changes model on select change", function(assert){
   var testModel = {
     value : "a"
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   var input = element.querySelector(".input");
   input.value = "b";
   TestUtil.fireEvent(input, "change");
-	assert.equal(testModel.value, "b", "changed model on change");
+	assert.equal(model.value, "b", "changed model on change");
 });
 
 //Tmpl-Full extended functionality
@@ -277,7 +277,7 @@ QUnit.test("templates list immediately", function(assert){
       value : "Lorem Ipsum"
     }
   ];
-  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmplList(testMarkup, testBindings, testModel);
   var spans = element.querySelectorAll("span");
   assert.equal(spans.length, 2, "templated 2 items");
   assert.equal(spans[0].textContent, "hello world", "templated 1");
@@ -299,7 +299,7 @@ QUnit.test("removes from list if array element is removed", function(assert){
       value : "Lorem Ipsum"
     }
   ];
-  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmplList(testMarkup, testBindings, testModel);
   var spans = element.querySelectorAll("span");
   assert.equal(spans.length, 2, "templated 2 items");
   testModel.pop();
@@ -328,7 +328,7 @@ QUnit.test("adds element if added to array", function(assert){
       value : "Lorem Ipsum"
     }
   ];
-  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmplList(testMarkup, testBindings, testModel);
   var spans = element.querySelectorAll("span");
   assert.equal(spans.length, 2, "templated 2 items");
   testModel.push({
@@ -359,7 +359,7 @@ QUnit.test("adds element if attached to DOM and previously empty", function(asse
       value : "Lorem Ipsum"
     }
   ];
-  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmplList(testMarkup, testBindings, testModel);
   fixture.appendChild(element);
   testModel.pop();
   testModel.pop();
@@ -384,7 +384,7 @@ QUnit.test("adds element if array started empty", function(assert){
     "span" : "value"
   };
   var testModel = [];
-  var element = Tmpl.tmplList(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmplList(testMarkup, testBindings, testModel);
   fixture.appendChild(element);
   testModel.push({
     value : "item 3"
@@ -415,7 +415,7 @@ QUnit.test("attaches event listener", function(assert){
       done();
     }
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   fixture.appendChild(element);
   var button = fixture.querySelector("button");
   
@@ -439,7 +439,7 @@ QUnit.test("re-attaches event listener", function(assert){
       assert.notOk(true);
     }
   };
-  var element = Tmpl.tmpl(testMarkup, testBindings, testModel);
+  var { docfrag : element, model } = Tmpl.tmpl(testMarkup, testBindings, testModel);
   fixture.appendChild(element);
   var button = fixture.querySelector("button");
   

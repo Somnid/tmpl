@@ -5,35 +5,35 @@ var Tmpl = (function(){
 
     function tmpl(templateElement, bindings, data){
       var tmplData = {};
+      bind(tmplData);
       tmplData.model = {
         templateElement : templateElement,
         bindings : bindings,
-        data : data
+        data : tmplData.proxyTmplData(data)
       };
-      bind(tmplData);
       tmplData.init();
 
-      return tmplData.model.docFrag;
+      return { docfrag: tmplData.model.docFrag, model : tmplData.model.data };
     }
     
     function tmplList(templateElement, bindings, data){
       var tmplData = {};
+      bindList(tmplData);
       tmplData.model = {
         templateElement : templateElement,
         bindings : bindings,
-        data : data
+        data : tmplData.proxyTmplListData(data)
       };
-      bindList(tmplData);
+      
       tmplData.initList();
       
       return tmplData.model.docFrag;
     }
     
     function bind(tmplData){
-      tmplData.attachObserver = attachObserver.bind(tmplData);
+      tmplData.proxyTmplData = proxyTmplData.bind(tmplData);
       tmplData.setBindings = setBindings.bind(tmplData);
-      tmplData.objectChanged = objectChanged.bind(tmplData);
-      tmplData.propChanged = propChanged.bind(tmplData);
+      tmplData.propertyChanged = propertyChanged.bind(tmplData);
       tmplData.setInputHandlers = setInputHandlers.bind(tmplData);
       tmplData.updateBinding = updateBinding.bind(tmplData);
       tmplData.init = init.bind(tmplData);
@@ -54,7 +54,6 @@ var Tmpl = (function(){
       this.model.docFrag = getTemplate(this.model.templateElement);
       this.model.elements = getDocfragChildList(this.model.docFrag);
       tagElements(this.model.elements, this.model.data);
-      this.attachObserver();
       this.setBindings();
     }
     
@@ -118,13 +117,18 @@ var Tmpl = (function(){
         return templateElement;
     }
     
-    function attachObserver(){
-      Object.observe(this.model.data, this.objectChanged);
+    function proxyTmplData(data){
+      return new Proxy(data, {
+        set : this.propertyChanged
+      });
     }
     
-    function attachListObservers(){
-      Object.observe(this.model.data, this.arrayChanged);
+    function proxyTmplListData(data){
+      var proxy = new Proxy(data, {
+        set : this.arrayChanged
+      });
       this.attachParentObserver();
+      return proxy;
     }
     
     function attachParentObserver(){
@@ -138,23 +142,22 @@ var Tmpl = (function(){
     
     function setBindings(){
       for(var key in this.model.bindings){
-        this.updateBinding(key, this.model.data);
+        var value = traverseObjectProps(this.model.data, this.model.bindings[key]);
+        this.updateBinding(key, this.model.data, null, null, value);
         this.setInputHandlers(key, this.model.data);
       }
-    }
-
-    function objectChanged(changes){
-      changes.forEach(this.propChanged);
     }
     
     function arrayChanged(changes){
       changes.forEach(this.arrayPropChanged);
     }
     
-    function propChanged(change){
+    function propertyChanged(obj, propName, value){
       for(var key in this.model.bindings){
-        this.updateBinding(key, change.object, change.name, change.oldValue);
+        this.updateBinding(key, obj, propName, obj[propName], value);
       }
+      obj[propName] = value;
+      return true;
     }
     
     function arrayPropChanged(change){
@@ -167,7 +170,7 @@ var Tmpl = (function(){
       }
     }
     
-    function updateBinding(bindKey, data, changedProp, oldValue){
+    function updateBinding(bindKey, data, changedProp, oldValue, newValue){
       var key = getDeepKey(bindKey);
       var accessor = this.model.bindings[bindKey];
       var matchingElements = queryElementsInList(this.model.elements, key.selector);
@@ -178,21 +181,20 @@ var Tmpl = (function(){
 	    }
       
       if(!changedProp || getFirstLevelProp(accessor) == changedProp){
-        var value = traverseObjectProps(data, accessor);
         if(key.existsAttribute){
-          setExistsElementAttributes(matchingElements, key.existsAttribute, value); 
+          setExistsElementAttributes(matchingElements, key.existsAttribute, newValue); 
         }else if(key.attribute){
-          setElementAttributes(matchingElements, key.attribute, value);
+          setElementAttributes(matchingElements, key.attribute, newValue);
         }else if(key.style){
-          setElementStyles(matchingElements, key.style, value);
+          setElementStyles(matchingElements, key.style, newValue);
         }else if(key.class){
-          setElementClasses(matchingElements, key.class, value);
+          setElementClasses(matchingElements, key.class, newValue);
         }else if(key.html){
-          setElementHtml(matchingElements, value);
+          setElementHtml(matchingElements, newValue);
         }else if(key.event){
-          setElementEvent(matchingElements, key.event, value, oldValue);
+          setElementEvent(matchingElements, key.event, newValue, oldValue);
         }else{
-          setElementValues(matchingElements, value);
+          setElementValues(matchingElements, newValue);
         }
       }
     }
